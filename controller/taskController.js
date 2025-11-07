@@ -103,15 +103,23 @@ exports.updateTask = async (req, res) => {
 
 exports.deleteTask = async (req, res) => {
   const { id } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: 'Invalid task id' });
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid task id' });
+  }
 
   try {
     const task = await Task.findById(id);
-    if (!task) return res.status(404).json({ message: 'Task not found' });
-    if (task.user.toString() !== req.user.id) return res.status(403).json({ message: 'Access denied' });
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
 
-    await task.remove();
-    res.json({ message: 'Task deleted' });
+    if (task.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    await task.deleteOne();
+
+    res.json({ message: 'Task deleted successfully' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
